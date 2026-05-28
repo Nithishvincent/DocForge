@@ -1,0 +1,1079 @@
+/* DocForge Premium AI Document Architect Style System */
+
+:root {
+  /* Application UI Colors (Sleek Dark Mode first for the Workspace) */
+  --ui-bg: #0b0c10;
+  --ui-sidebar: #13151c;
+  --ui-canvas: #1e1f26;
+  --ui-border: #262a36;
+  --ui-text: #e2e8f0;
+  --ui-text-muted: #94a3b8;
+  --ui-accent: #6366f1;
+  --ui-accent-hover: #4f46e5;
+  --ui-success: #10b981;
+  --ui-warning: #f59e0b;
+  --ui-error: #ef4444;
+  
+  /* Document Specific CSS variables (Updated dynamically by React State) */
+  --doc-accent: #6366f1;
+  --doc-font-heading: 'Outfit', sans-serif;
+  --doc-font-body: 'Poppins', sans-serif;
+  --doc-margin: 60px;
+  --doc-align: justify;
+  --zoom-factor: 1;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--ui-bg);
+  color: var(--ui-text);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+#root {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  border: none;
+  max-width: 100vw;
+  text-align: left;
+}
+
+/* ==========================================================================
+   Workspace Layout
+   ========================================================================== */
+
+.app-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Control Panel Sidebar */
+.sidebar {
+  width: 380px;
+  min-width: 380px;
+  background-color: var(--ui-sidebar);
+  border-right: 1px solid var(--ui-border);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  z-index: 10;
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.sidebar-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--ui-border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-header h1 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  margin: 0;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #a78bfa, #6366f1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sidebar-header .logo-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #a78bfa, #6366f1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: white;
+  font-size: 18px;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+}
+
+.sidebar-scrollable {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.section-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--ui-text-muted);
+  margin: 20px 0 12px 0;
+  font-weight: 700;
+  border-bottom: 1px solid var(--ui-border);
+  padding-bottom: 6px;
+}
+
+.section-title:first-of-type {
+  margin-top: 0;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #cbd5e1;
+}
+
+.input-text, .select-input {
+  width: 100%;
+  background-color: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--ui-text);
+  font-family: inherit;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.input-text:focus, .select-input:focus {
+  outline: none;
+  border-color: var(--ui-accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+
+.slider-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.slider-input {
+  flex: 1;
+  accent-color: var(--ui-accent);
+}
+
+.slider-value {
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  background-color: var(--ui-bg);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--ui-border);
+  min-width: 32px;
+  text-align: center;
+}
+
+/* Accent Palette Grid */
+.color-palette {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.color-option {
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.2s, border-color 0.2s;
+  position: relative;
+}
+
+.color-option:hover {
+  transform: translateY(-2px);
+}
+
+.color-option.active {
+  border-color: white;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.custom-color-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.color-input-element {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 40px;
+  height: 30px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.color-input-element::-webkit-color-swatch {
+  border-radius: 6px;
+  border: 1px solid var(--ui-border);
+}
+
+/* Button UI */
+.btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, var(--ui-accent), var(--ui-accent-hover));
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.45);
+}
+
+.btn-primary:disabled {
+  background: #272a37;
+  color: var(--ui-text-muted);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  flex: 1;
+  background-color: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  color: var(--ui-text);
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-secondary:hover {
+  border-color: var(--ui-text-muted);
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.sidebar-actions {
+  padding: 20px 24px;
+  border-top: 1px solid var(--ui-border);
+  background-color: var(--ui-sidebar);
+}
+
+.export-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+/* Canvas Area (A4 Preview Container) */
+.canvas-area {
+  flex: 1;
+  background-color: var(--ui-canvas);
+  overflow-y: auto;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.canvas-wrapper {
+  transform: scale(var(--zoom-factor));
+  transform-origin: top center;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  transition: transform 0.15s ease-out;
+  padding-bottom: 100px;
+}
+
+/* Canvas Zoom Controls (Floating) */
+.zoom-controls {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background-color: rgba(19, 21, 28, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--ui-border);
+  padding: 8px 16px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+}
+
+.zoom-btn {
+  background: none;
+  border: none;
+  color: var(--ui-text);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.zoom-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.zoom-value {
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  min-width: 44px;
+  text-align: center;
+}
+
+/* Edit Mode Toggle Label */
+.switch-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--ui-bg);
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--ui-border);
+  margin-top: 14px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 22px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider-switch {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #3f4454;
+  transition: .2s;
+  border-radius: 22px;
+}
+
+.slider-switch:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .2s;
+  border-radius: 50%;
+}
+
+input:checked + .slider-switch {
+  background-color: var(--ui-accent);
+}
+
+input:checked + .slider-switch:before {
+  transform: translateX(22px);
+}
+
+/* Loading overlay / spinner */
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background-color: rgba(19, 21, 28, 0.9);
+  border: 1px solid var(--ui-border);
+  border-radius: 12px;
+  color: var(--ui-text);
+  max-width: 400px;
+  margin: 60px auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(99, 102, 241, 0.1);
+  border-top-color: var(--ui-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 6px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+  margin-top: 15px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #a78bfa, #6366f1);
+  width: 0%;
+  transition: width 0.4s ease;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   A4 Page Canvas Render Styling (Crucial for PDF accuracy)
+   ========================================================================== */
+
+.page {
+  width: 794px; /* A4 width at 96 DPI */
+  height: 1123px; /* A4 height at 96 DPI */
+  min-height: 1123px;
+  max-height: 1123px;
+  background-color: #ffffff;
+  color: #1e293b;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: var(--doc-margin);
+  box-sizing: border-box;
+}
+
+/* Document typography */
+.page h1, .page h2, .page h3, .page h4 {
+  font-family: var(--doc-font-heading);
+  color: #0f172a;
+  margin-top: 0;
+}
+
+.page p, .page li, .page td, .page th {
+  font-family: var(--doc-font-body);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #334155;
+  text-align: var(--doc-align);
+}
+
+/* Inline Edit Highlight */
+[contenteditable="true"] {
+  outline: 1px dashed rgba(99, 102, 241, 0.4);
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+  cursor: text;
+}
+
+[contenteditable="true"]:hover {
+  background-color: rgba(99, 102, 241, 0.05);
+}
+
+[contenteditable="true"]:focus {
+  outline: 2px solid var(--ui-accent);
+  background-color: white;
+  color: black;
+}
+
+/* Standard Header / Footer elements inside pages */
+.page-header {
+  position: absolute;
+  top: 25px;
+  left: var(--doc-margin);
+  right: var(--doc-margin);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 6px;
+  font-size: 10px;
+  color: #64748b;
+  font-family: var(--doc-font-heading);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.page-footer {
+  position: absolute;
+  bottom: 25px;
+  left: var(--doc-margin);
+  right: var(--doc-margin);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 6px;
+  font-size: 10px;
+  color: #64748b;
+  font-family: var(--doc-font-heading);
+}
+
+/* Page content slot */
+.page-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin-top: 15px; /* Spacing from absolute header */
+  margin-bottom: 15px; /* Spacing from absolute footer */
+  overflow: hidden;
+  position: relative;
+}
+
+/* ==========================================================================
+   Page Types Styles
+   ========================================================================== */
+
+/* 1. Cover Page (Cover template styles) */
+.page-cover {
+  justify-content: space-between;
+  height: 100%;
+}
+
+.cover-header-brand {
+  font-family: var(--doc-font-heading);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 700;
+  color: var(--doc-accent);
+}
+
+.cover-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.cover-title {
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 16px;
+  color: #0f172a;
+  letter-spacing: -1px;
+}
+
+.cover-subtitle {
+  font-size: 16px;
+  color: #475569;
+  line-height: 1.5;
+  margin-bottom: 30px;
+  font-weight: 400;
+  max-width: 90%;
+}
+
+.cover-divider {
+  width: 80px;
+  height: 6px;
+  background-color: var(--doc-accent);
+  border-radius: 3px;
+  margin-bottom: 40px;
+}
+
+.cover-meta {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 20px;
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.meta-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #94a3b8;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.meta-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  font-family: var(--doc-font-heading);
+}
+
+/* Cover Page Visual Elements */
+.cover-graphic-container {
+  margin-top: 20px;
+  width: 100%;
+  height: 240px;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border: 1px solid #e2e8f0;
+}
+
+.cover-graphic-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cover-graphic-svg {
+  width: 90%;
+  height: 90%;
+}
+
+/* 2. Table of Contents Page */
+.page-toc-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 32px;
+  border-bottom: 2px solid var(--doc-accent);
+  padding-bottom: 8px;
+}
+
+.toc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.toc-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-size: 13.5px;
+  font-weight: 500;
+  font-family: var(--doc-font-body);
+}
+
+.toc-item-title {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  color: #334155;
+}
+
+.toc-item-title::after {
+  content: " . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ";
+  color: #cbd5e1;
+  font-weight: 300;
+  margin-left: 8px;
+  white-space: nowrap;
+}
+
+.toc-item-page {
+  font-family: 'Fira Code', monospace;
+  font-weight: 600;
+  color: var(--doc-accent);
+  margin-left: 8px;
+}
+
+/* 3. Preface / General Chapter Page Styles */
+.chapter-header-badge {
+  display: inline-block;
+  background-color: rgba(99, 102, 241, 0.1);
+  color: var(--doc-accent);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  font-family: var(--doc-font-heading);
+}
+
+.page-chapter-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #0f172a;
+}
+
+.drop-cap::first-letter {
+  font-family: var(--doc-font-heading);
+  float: left;
+  font-size: 54px;
+  line-height: 42px;
+  padding-top: 4px;
+  padding-right: 8px;
+  padding-left: 3px;
+  font-weight: bold;
+  color: var(--doc-accent);
+}
+
+/* Paragraph styling */
+.page-paragraph {
+  margin-bottom: 18px;
+  text-align: var(--doc-align);
+}
+
+.page-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+/* Visual Feature: Callout */
+.callout-box {
+  background-color: #f8fafc;
+  border-left: 4px solid var(--doc-accent);
+  padding: 16px 20px;
+  border-radius: 0 8px 8px 0;
+  margin: 20px 0;
+  font-style: italic;
+  font-weight: 500;
+  color: #475569;
+  position: relative;
+}
+
+.callout-box::before {
+  content: "“";
+  font-family: Georgia, serif;
+  font-size: 40px;
+  line-height: 0;
+  position: absolute;
+  left: 8px;
+  top: 14px;
+  color: rgba(99, 102, 241, 0.2);
+}
+
+/* Visual Feature: Lists */
+.custom-list {
+  padding-left: 20px;
+  margin: 18px 0;
+}
+
+.custom-list-item {
+  margin-bottom: 10px;
+  position: relative;
+  list-style: none;
+}
+
+.custom-list-item::before {
+  content: "■";
+  color: var(--doc-accent);
+  font-size: 9px;
+  position: absolute;
+  left: -20px;
+  top: 1px;
+}
+
+/* Visual Feature: Custom Tables */
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 22px 0;
+  font-size: 12px;
+}
+
+.custom-table th {
+  background-color: #f1f5f9;
+  color: #1e293b;
+  font-family: var(--doc-font-heading);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 2px solid #cbd5e1;
+}
+
+.custom-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #475569;
+}
+
+.custom-table tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Visual Feature: Dynamic Charts */
+.chart-container {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 22px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chart-title {
+  font-family: var(--doc-font-heading);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #475569;
+}
+
+.chart-svg {
+  width: 100%;
+  max-width: 440px;
+  height: 160px;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 15px;
+  font-size: 10px;
+  color: #64748b;
+  margin-top: 10px;
+  font-family: var(--doc-font-body);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-color {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+/* References styling */
+.reference-item {
+  margin-bottom: 16px;
+  padding-left: 24px;
+  text-indent: -24px;
+  font-size: 13px;
+  color: #475569;
+}
+
+/* Photo slots inside documents */
+.document-photo-container {
+  width: 100%;
+  height: 200px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 20px 0;
+  border: 1px solid #e2e8f0;
+}
+
+.document-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ==========================================================================
+   Document Styling Templates (Applying Fonts & Details)
+   ========================================================================== */
+
+/* Modern Minimalist */
+.template-minimalist {
+  --doc-font-heading: 'Outfit', sans-serif;
+  --doc-font-body: 'Outfit', sans-serif;
+}
+.template-minimalist .page-header {
+  border-bottom: 1px solid #e2e8f0;
+}
+.template-minimalist .page-footer {
+  border-top: none;
+}
+.template-minimalist .cover-title {
+  font-weight: 300;
+  letter-spacing: -2px;
+}
+
+/* Corporate Executive */
+.template-executive {
+  --doc-font-heading: 'Poppins', sans-serif;
+  --doc-font-body: 'Poppins', sans-serif;
+}
+.template-executive .page-header {
+  border-bottom: 2px solid var(--doc-accent);
+}
+.template-executive .page-footer {
+  background-color: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: var(--doc-margin);
+  padding-right: var(--doc-margin);
+  bottom: 0;
+  height: 50px;
+  align-items: center;
+}
+.template-executive .cover-divider {
+  width: 100%;
+  height: 4px;
+}
+
+/* Academic Report */
+.template-academic {
+  --doc-font-heading: 'Playfair Display', serif;
+  --doc-font-body: Georgia, serif;
+}
+.template-academic .page-header {
+  border-bottom: 1px double #94a3b8;
+  font-family: Georgia, serif;
+  text-transform: none;
+  font-style: italic;
+}
+.template-academic .page-footer {
+  border-top: 1px double #94a3b8;
+  font-family: Georgia, serif;
+}
+.template-academic .cover-divider {
+  border-top: 1px solid #475569;
+  border-bottom: 1px solid #475569;
+  background-color: transparent;
+  height: 4px;
+}
+
+/* Elegant Editorial */
+.template-editorial {
+  --doc-font-heading: 'Playfair Display', serif;
+  --doc-font-body: 'Poppins', sans-serif;
+}
+.template-editorial .page {
+  background-color: #fdfbf7; /* Off-white warm page */
+}
+.template-editorial .page-header {
+  border: none;
+  font-weight: 300;
+  letter-spacing: 3px;
+}
+.template-editorial .page-chapter-title {
+  text-align: center;
+  font-style: italic;
+  font-weight: 400;
+}
+.template-editorial .cover-title {
+  text-align: center;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 700;
+}
+.template-editorial .cover-subtitle {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+.template-editorial .cover-divider {
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #92400e;
+}
+
+/* Tech Startup */
+.template-tech {
+  --doc-font-heading: 'Outfit', sans-serif;
+  --doc-font-body: 'Poppins', sans-serif;
+}
+.template-tech .page {
+  border: 1px solid #f1f5f9;
+}
+.template-tech .page-header {
+  border: none;
+  padding: 4px 12px;
+  background-color: #f8fafc;
+  border-radius: 6px;
+  top: 20px;
+}
+.template-tech .custom-table th {
+  background-color: #0f172a;
+  color: white;
+}
+.template-tech .custom-table td {
+  font-family: 'Fira Code', monospace;
+  font-size: 11px;
+}
+.template-tech .callout-box {
+  background-color: rgba(99, 102, 241, 0.03);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-left: 4px solid var(--doc-accent);
+}
+
+/* ==========================================================================
+   Page Breaks and Layout settings for PDF export resets
+   ========================================================================== */
+
+.pdf-mode {
+  transform: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background-color: #ffffff !important;
+}
+
+.pdf-page-break {
+  page-break-after: always;
+  break-after: page;
+  box-shadow: none !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+/* Custom Webkit scrollbar for premium UI */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(19, 21, 28, 0.5);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ui-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ui-text-muted);
+}
