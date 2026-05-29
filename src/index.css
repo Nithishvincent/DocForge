@@ -1077,3 +1077,229 @@ input:checked + .slider-switch:before {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--ui-text-muted);
 }
+
+/* ==========================================================================
+   New Image Resolver & Rich Schema Classes
+   ========================================================================== */
+
+/* Cover Hero Image */
+.cover-hero-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+}
+.cover-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cover-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(255,255,255,0) 30%, rgba(255,255,255,0.7) 100%);
+}
+
+/* Cover abstract tagline */
+.cover-abstract {
+  font-size: 12px;
+  color: #64748b;
+  font-style: italic;
+  margin-top: 10px;
+  line-height: 1.6;
+  font-family: var(--doc-font-body);
+  max-width: 85%;
+}
+
+/* Generic photo caption below any image */
+.photo-caption {
+  font-size: 10.5px;
+  color: #64748b;
+  margin-top: 5px;
+  text-align: center;
+  font-style: italic;
+  font-family: var(--doc-font-body);
+  line-height: 1.5;
+}
+
+/* Key Findings box (preface page) */
+.key-findings-box {
+  background: #f0f9ff;
+  border-left: 3px solid var(--doc-accent);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-top: 18px;
+}
+.key-findings-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--doc-accent);
+  margin-bottom: 8px;
+  font-family: var(--doc-font-heading);
+}
+.key-findings-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.key-findings-item {
+  font-size: 12px;
+  color: #334155;
+  padding: 4px 0 4px 16px;
+  position: relative;
+  line-height: 1.5;
+  font-family: var(--doc-font-body);
+}
+.key-findings-item::before {
+  content: '\25B8';
+  position: absolute;
+  left: 0;
+  color: var(--doc-accent);
+}
+
+/* Strategic Priorities (conclusion page) */
+.strategic-priorities-box {
+  margin-top: 20px;
+  border-top: 2px solid var(--doc-accent);
+  padding-top: 14px;
+}
+.strategic-priorities-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--doc-accent);
+  margin-bottom: 12px;
+  font-family: var(--doc-font-heading);
+}
+.strategic-priorities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.strategic-priority-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: #f8fafc;
+  border-radius: 6px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+}
+.sp-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--doc-accent);
+  border-radius: 4px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  font-family: var(--doc-font-heading);
+  line-height: 1.6;
+  flex-shrink: 0;
+}
+.sp-action {
+  font-size: 11.5px;
+  color: #475569;
+  line-height: 1.55;
+  font-family: var(--doc-font-body);
+}
+
+/* Section heading (h3 inside chapter pages) */
+.page-section-heading {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--doc-accent);
+  margin: 6px 0 12px 0;
+  font-family: var(--doc-font-heading);
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 4px;
+}
+
+/* Inline image positioning (float-based for print compat) */
+.inline-image-wrap {
+  margin: 14px 0;
+}
+.inline-image-wrap.inline-image-right {
+  float: right;
+  width: 46%;
+  margin: 6px 0 10px 14px;
+}
+.inline-image-wrap.inline-image-left {
+  float: left;
+  width: 46%;
+  margin: 6px 14px 10px 0;
+}
+.inline-image-wrap.inline-image-full-width {
+  width: 100%;
+  clear: both;
+}
+
+/* Image pair side-by-side */
+.image-pair-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+.image-pair-item {
+  overflow: hidden;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+.image-pair-item img {
+  width: 100%;
+  object-fit: cover;
+  display: block;
+}
+.image-pair-item .photo-caption {
+  padding: 4px 6px;
+  background: #f8fafc;
+}
+
+/* List title label */
+.list-title-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--doc-accent);
+  margin-bottom: 6px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-family: var(--doc-font-heading);
+}
+
+/* Table caption label */
+.table-caption-label {
+  font-size: 10.5px;
+  color: #64748b;
+  font-style: italic;
+  margin-bottom: 6px;
+  font-family: var(--doc-font-body);
+}
+
+/* Chart title and caption labels */
+.chart-title-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 4px;
+  font-family: var(--doc-font-heading);
+}
+.chart-caption-label {
+  font-size: 10.5px;
+  color: #64748b;
+  font-style: italic;
+  margin-top: 4px;
+  font-family: var(--doc-font-body);
+}
+
+/* Clearfix for floated inline images within page content */
+.page-content::after {
+  content: '';
+  display: table;
+  clear: both;
+}

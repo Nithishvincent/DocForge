@@ -9,69 +9,40 @@ const ACCENT_PRESETS = [
   { name: 'Sleek Obsidian', value: '#0f172a' },
 ];
 
-// Curated Unsplash images for high-fidelity illustration mapping
-const ILLUSTRATION_MAP = {
-  tech: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1000&auto=format&fit=crop&q=80',
-  finance: 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=1000&auto=format&fit=crop&q=80',
-  science: 'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?w=1000&auto=format&fit=crop&q=80',
-  nature: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1000&auto=format&fit=crop&q=80',
-  business: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1000&auto=format&fit=crop&q=80',
-  education: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1000&auto=format&fit=crop&q=80',
-  general: 'https://images.unsplash.com/photo-1557683316-973673baf926?w=1000&auto=format&fit=crop&q=80',
+// ─── Image URL resolvers (free, no API key) ───────────────────────────────
+
+// Stable Unsplash Source: same query → same image every render
+const stableUnsplashUrl = (query, w, h) => {
+  const seed = (query || 'document').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  return `https://source.unsplash.com/${w}x${h}/?${encodeURIComponent(query)}&sig=${seed}`;
 };
 
-// Rich set of accurate stock photos grouped by topic category
-const TOPIC_IMAGES = {
-  tech: [
-    'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1000&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1000&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1000&auto=format&fit=crop&q=80'
-  ],
-  finance: [
-    'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=1000&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=1000&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1000&auto=format&fit=crop&q=80'
-  ],
-  science: [
-    'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?w=1000&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1507668077129-56e32842fceb?w=1000&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=1000&auto=format&fit=crop&q=80'
-  ],
-  nature: [
-    'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1000&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=1000&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1000&auto=format&fit=crop&q=80'
-  ],
-  business: [
-    'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1000&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1000&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1000&auto=format&fit=crop&q=80'
-  ],
-  education: [
-    'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1000&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=1000&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1000&auto=format&fit=crop&q=80'
-  ],
-  general: [
-    'https://images.unsplash.com/photo-1557683316-973673baf926?w=1000&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=1000&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=1000&auto=format&fit=crop&q=80'
-  ]
+// Picsum fallback: abstract/artistic placeholder, never 404s
+const picsumUrl = (seed, w, h) =>
+  `https://picsum.photos/seed/${encodeURIComponent(seed)}/${w}/${h}`;
+
+// Size map: matches photoSize field from Gemini JSON
+const SIZE_MAP = {
+  hero:      { w: 1200, h: 420 },
+  wide:      { w: 1200, h: 260 },
+  inline:    { w:  600, h: 200 },
+  thumbnail: { w:  300, h: 160 },
 };
 
-const getPhotoUrl = (query) => {
-  const q = (query || '').toLowerCase();
-  let category = 'general';
-  if (q.includes('tech') || q.includes('code') || q.includes('comput') || q.includes('system') || q.includes('network') || q.includes('software')) category = 'tech';
-  else if (q.includes('finance') || q.includes('market') || q.includes('money') || q.includes('stock') || q.includes('business') || q.includes('analysis') || q.includes('strateg')) category = 'business';
-  else if (q.includes('science') || q.includes('lab') || q.includes('chem') || q.includes('bio') || q.includes('research') || q.includes('medic') || q.includes('health')) category = 'science';
-  else if (q.includes('nature') || q.includes('green') || q.includes('environment') || q.includes('forest') || q.includes('tree') || q.includes('earth') || q.includes('garden')) category = 'nature';
-  else if (q.includes('learn') || q.includes('book') || q.includes('educat') || q.includes('school') || q.includes('student') || q.includes('teach')) category = 'education';
-  
-  const list = TOPIC_IMAGES[category] || TOPIC_IMAGES.general;
-  const index = Math.abs(q.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % list.length;
-  return list[index];
+// Main resolver — returns {src, alt, caption, width, height}
+const resolveImage = (imageObj = {}) => {
+  const { photoQuery = 'professional document', photoAlt = '', photoCaption = '', photoSize = 'inline' } = imageObj;
+  const { w, h } = SIZE_MAP[photoSize] || SIZE_MAP.inline;
+  return {
+    src:     stableUnsplashUrl(photoQuery, w, h),
+    fallback: picsumUrl(photoAlt || photoQuery, w, h),
+    alt:     photoAlt,
+    caption: photoCaption,
+    width:   w,
+    height:  h,
+  };
 };
+
 
 // Default high-fidelity sample document displayed on load
 const MOCK_DOCUMENT_PAGES = [
@@ -156,25 +127,45 @@ const MOCK_DOCUMENT_PAGES = [
   }
 ];
 
-// --- High-fidelity Dynamic Offline Generator ---
+// --- High-fidelity Dynamic Offline Generator (new rich schema) ---
 const generateMockPages = (topic, pageCount) => {
   const pages = [];
-  
+  const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
   // 1. Cover
   pages.push({
     type: 'cover',
     title: topic,
-    subtitle: 'A Comprehensive Strategic Study and Operational Framework',
-    dateStr: new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }),
-    author: 'DocForge Synthesis Engine',
-    version: 'v1.0.0',
-    classification: 'Official Study Report / Demo Mode'
+    subtitle: 'A Comprehensive Strategic Analysis and Operational Framework',
+    authors: 'Research & Intelligence Division',
+    dateStr: date,
+    abstract: `This document presents a rigorous, evidence-based analysis of ${topic}, synthesizing current research and operational frameworks to deliver actionable strategic recommendations for practitioners and decision-makers.`,
+    heroImage: {
+      photoQuery: `${topic}, cinematic, aerial, wide, modern`,
+      photoAlt: `Wide cinematic representation of ${topic}`,
+      photoCaption: `${topic}: A strategic lens on the forces shaping contemporary practice and future direction.`,
+      photoSize: 'hero',
+    },
   });
 
   // 2. TOC
   pages.push({
     type: 'toc',
-    title: 'Table of Contents'
+    title: 'Table of Contents',
+    entries: [
+      { label: 'Preface & Scope', page: 3 },
+      { label: `Chapter 1: Foundations of ${topic}`, page: 4 },
+      { label: `Chapter 2: Technical Dimensions`, page: 6 },
+      { label: `Chapter 3: Strategic Implementation`, page: 8 },
+      { label: 'Summary & Strategic Conclusion', page: pageCount - 1 },
+      { label: 'References & Bibliography', page: pageCount },
+    ],
+    tocImage: {
+      photoQuery: `${topic}, abstract, concept, design, visualization`,
+      photoAlt: `Abstract conceptual illustration for ${topic}`,
+      photoCaption: `Conceptual overview of the analytical landscape explored throughout this document.`,
+      photoSize: 'inline',
+    },
   });
 
   // 3. Preface
@@ -182,72 +173,128 @@ const generateMockPages = (topic, pageCount) => {
     type: 'preface',
     title: 'Preface & Scope',
     paragraphs: [
-      `As organizations transition rapidly into intelligence-driven ecosystems, the demand for structured, dynamic, and publication-ready communications regarding "${topic}" has never been higher. This strategic blueprint introduces the foundational principles of "${topic}" compilation architecture designed to automate, customize, and serialize enterprise knowledge assets.`,
-      `Our primary scope encompasses the structural layout, styling mechanics, and systems that permit professionals to compile manuals, research monographs, and strategic reports on "${topic}". Through algorithmic layout enforcement and themed projections, this framework establishes a new benchmark for business communication standards.`
-    ]
+      `The accelerating pace of change within the domain of ${topic} demands rigorous, evidence-based analysis that moves beyond surface-level description toward genuine operational insight. Organizations that invest in structured knowledge management frameworks consistently outperform those relying on ad-hoc processes, as demonstrated repeatedly in cross-sector benchmarking studies. This document was commissioned to address the growing gap between theoretical understanding and practical implementation of ${topic}-related strategies. The authors have synthesized primary research, industry data, and expert consultation to produce a resource that is both analytically rigorous and immediately actionable for practitioners at all organizational levels.`,
+      `Methodologically, this analysis draws on a mixed-methods approach combining quantitative performance metrics, qualitative case study evidence, and forward-looking scenario modeling. The scope encompasses the full lifecycle of ${topic} implementation — from initial assessment and strategic planning through deployment, governance, and continuous improvement cycles. Each chapter is structured to build incrementally on the preceding analysis, culminating in a set of prioritized strategic recommendations calibrated to organizations at different stages of maturity. Readers should approach this document as both a diagnostic instrument and a strategic roadmap, applying its frameworks in the context of their specific organizational realities.`,
+    ],
+    keyFindings: [
+      `Organizations with mature ${topic} frameworks demonstrate 34% higher operational efficiency than industry baselines.`,
+      `Cross-functional alignment is the single greatest predictor of successful ${topic} implementation outcomes.`,
+      `Regulatory compliance requirements are accelerating investment in structured ${topic} governance at all scales.`,
+    ],
+    prefaceImage: {
+      photoQuery: `research, analysis, strategy, workspace, professional`,
+      photoAlt: 'Professional analyst reviewing strategic documentation at a modern workspace',
+      photoCaption: `The analytical foundation of this study draws on cross-sector research spanning multiple domains of ${topic} application.`,
+      photoSize: 'wide',
+    },
   });
 
-  // 4. Chapter pages (Page 4 to pageCount - 2)
+  // 4. Chapter pages
   const chapters = [
-    { num: 1, title: `Foundations and Core Background of ${topic}` },
-    { num: 2, title: `Technical and Operational Dimensions of ${topic}` },
-    { num: 3, title: `Strategic Implementation and Integration of ${topic}` },
-    { num: 4, title: `Advanced Analytics, Case Studies, and reference models` },
-    { num: 5, title: `Key Stakeholder Alignment and Policy Guidelines` }
+    { num: 1, title: `Foundations and Core Background of ${topic}`, section: 'Theoretical Underpinnings' },
+    { num: 2, title: `Technical and Operational Dimensions of ${topic}`, section: 'System Architecture & Tooling' },
+    { num: 3, title: `Strategic Implementation of ${topic}`, section: 'Deployment Frameworks & Governance' },
+    { num: 4, title: `Advanced Analytics and Case Studies`, section: 'Data-Driven Insights & Evidence' },
+    { num: 5, title: `Stakeholder Alignment and Policy`, section: 'Organizational Change Management' },
   ];
 
-  const totalChapterPages = pageCount - 4; // Total pages for chapters
+  const layoutCycles = [
+    // layoutType 0: callout + chapterOpener + inlineImage
+    (pageObj, ch, pIdx) => {
+      pageObj.hasCallout = true;
+      pageObj.calloutText = `A well-structured ${topic} strategy reduces time-to-value by up to 40% while improving cross-functional alignment across the entire delivery pipeline.`;
+      pageObj.chapterOpenerImage = {
+        photoQuery: `${topic}, ${ch.title.split(' ').slice(-2).join(', ')}, wide, professional`,
+        photoAlt: `Thematic opener for Chapter ${ch.num}: ${ch.title}`,
+        photoCaption: `Chapter ${ch.num} examines ${ch.title.toLowerCase()}, establishing the conceptual grounding for subsequent analysis.`,
+        photoSize: 'wide',
+      };
+    },
+    // layoutType 1: table
+    (pageObj) => {
+      pageObj.hasTable = true;
+      pageObj.tableCaption = `Performance gap analysis across critical ${topic} implementation dimensions.`;
+      pageObj.tableHeaders = ['Dimension', 'Current State', 'Target State', 'Gap'];
+      pageObj.tableRows = [
+        { dimension: `${topic} Adoption Rate`, current: '42% baseline penetration', target: '85% enterprise-wide', gap: '43 percentage points' },
+        { dimension: 'Process Automation Coverage', current: '28% of workflows', target: '71% within 18 months', gap: 'Requires phased rollout' },
+        { dimension: 'Compliance Alignment', current: '64% regulatory coverage', target: '100% audit-ready', gap: 'Policy and tooling updates needed' },
+      ];
+    },
+    // layoutType 2: flow-chart + inline image
+    (pageObj, ch, pIdx) => {
+      pageObj.hasChart = true;
+      pageObj.chartType = 'flow-chart';
+      pageObj.chartTitle = `${topic} Implementation Sequence`;
+      pageObj.chartCaption = `This workflow illustrates the four-phase execution model recommended for ${topic} deployment, from initial scoping through sustained optimisation.`;
+      pageObj.inlineImage = {
+        photoQuery: `workflow, process, diagram, implementation, technology`,
+        photoAlt: 'Workflow implementation diagram showing sequential process stages',
+        photoCaption: `Process flow mapping for ${topic} operationalisation across enterprise functions.`,
+        photoSize: 'inline',
+        position: 'right',
+      };
+    },
+    // layoutType 3: donut-chart
+    (pageObj, ch) => {
+      pageObj.hasChart = true;
+      pageObj.chartType = 'donut-chart';
+      pageObj.chartTitle = `Resource Allocation Across ${topic} Initiatives`;
+      pageObj.chartCaption = `Budget and effort distribution reveals that operational core processes command the largest share of resources, with infrastructure and compliance as significant secondary allocations.`;
+      pageObj.chartData = {
+        labels: ['Core Operations', 'Infrastructure', 'Compliance', 'R&D', 'Training'],
+        values: [42, 23, 18, 11, 6],
+      };
+    },
+    // layoutType 4: list + imagePair
+    (pageObj, ch, pIdx) => {
+      pageObj.hasList = true;
+      pageObj.listTitle = `Key Principles for ${topic} Excellence`;
+      pageObj.listItems = [
+        `Establish a clear governance charter with defined ownership and escalation pathways before initiating any ${topic} program.`,
+        `Invest in change management capacity proportional to the scale of the ${topic} transformation — underestimating this is the primary cause of program failure.`,
+        `Deploy continuous monitoring dashboards aligned to pre-agreed KPIs, enabling data-driven course correction without requiring executive intervention for every decision.`,
+        `Build iterative review cadences (quarterly at minimum) to re-validate assumptions as market conditions and regulatory requirements evolve.`,
+      ];
+      pageObj.imagePair = {
+        imageA: {
+          photoQuery: `${topic}, planning, strategy, whiteboard, team`,
+          photoAlt: `Team collaborating on ${topic} strategic planning`,
+          photoCaption: `Strategic planning sessions establish shared ownership and alignment across stakeholders.`,
+          photoSize: 'thumbnail',
+        },
+        imageB: {
+          photoQuery: `${topic}, data, analytics, dashboard, metrics`,
+          photoAlt: `Analytics dashboard displaying ${topic} performance metrics`,
+          photoCaption: `Performance dashboards provide real-time visibility into program health and delivery targets.`,
+          photoSize: 'thumbnail',
+        },
+        pairCaption: `Effective ${topic} implementation requires equal investment in human alignment (left) and data-driven monitoring (right).`,
+      };
+    },
+  ];
+
+  const totalChapterPages = pageCount - 4;
   let currentChapterIdx = 0;
   let pageInCurrentChapter = 1;
 
   for (let i = 0; i < totalChapterPages; i++) {
     const ch = chapters[currentChapterIdx % chapters.length];
-    
+    const layoutType = i % layoutCycles.length;
+
     const pageObj = {
       type: 'chapter-page',
       chapterTitle: `Chapter ${ch.num}: ${ch.title}`,
       chapterIndex: ch.num,
       pageIndex: pageInCurrentChapter,
+      sectionHeading: `${ch.section} — Part ${pageInCurrentChapter}`,
       paragraphs: [
-        `Analyzing the landscape of "${topic}" requires a deep understanding of its functional components. First, teams must map the workflow dependencies that influence production. Unaligned variables can lead to cascading delays, structural conflicts, and compliance errors during execution.`,
-        `By leveraging modern design principles, organizations can standardize their approach to "${topic}". The data gathered during initial phases indicates that structured layout coordinates reduce operational friction by up to 35%, ensuring cross-functional teams operate from a single, unified source of truth.`
-      ]
+        `The analysis of ${topic} within the context of ${ch.title.toLowerCase()} reveals several critical interdependencies that practitioners routinely underestimate. At the structural level, organizations must first audit their existing capability landscape against a set of standardized maturity indicators before committing resources to transformation initiatives. Research consistently shows that programs launched without this diagnostic foundation are 2.4 times more likely to experience significant scope creep and budget overruns, eroding stakeholder confidence at precisely the moment sustained executive support is most needed.`,
+        `Operationally, the integration of ${topic} frameworks demands a deliberate sequencing strategy that prioritizes high-visibility quick wins while simultaneously building the institutional infrastructure required for long-term sustainability. Teams that attempt to implement all components simultaneously typically face competing priorities that dilute focus and fragment accountability. A phased approach — anchored by a clear governance structure, executive sponsorship, and well-defined success metrics — consistently yields superior outcomes across the full spectrum of organizational sizes and sector contexts examined in the comparative literature.`,
+      ],
     };
 
-    // Cycle layouts (Callout + Photo -> Table -> Flow Chart -> Donut Chart -> List + Photo)
-    const layoutType = i % 5;
-    if (layoutType === 0) {
-      pageObj.hasCallout = true;
-      pageObj.calloutText = `Strategic Quote: "Developing a comprehensive roadmap for ${topic} is essential for achieving long-term operational excellence and organization-wide alignment."`;
-      pageObj.hasPhoto = true;
-      pageObj.photoQuery = `${topic} roadmap system`;
-      pageObj.photoCaption = `Figure ${ch.num}.${pageInCurrentChapter}: Strategic roadmap alignment and milestone check targets.`;
-    } else if (layoutType === 1) {
-      pageObj.hasTable = true;
-      pageObj.tableRows = [
-        { metric: `${topic} Performance`, baseline: '74.2% variance', target: '99.9% aligned' },
-        { metric: 'Average Compile Time', baseline: '12.4 seconds', target: '1.8 seconds (cached)' },
-        { metric: 'Operational Compliance', baseline: '81.0% reliability', target: '100% fail-safe standards' }
-      ];
-    } else if (layoutType === 2) {
-      pageObj.hasChart = true;
-      pageObj.chartType = 'flow-chart';
-    } else if (layoutType === 3) {
-      pageObj.hasChart = true;
-      pageObj.chartType = 'donut-chart';
-    } else if (layoutType === 4) {
-      pageObj.hasList = true;
-      pageObj.listItems = [
-        `Establish clear strategic goals for ${topic} integration.`,
-        `Train operational personnel on core safety and quality protocols.`,
-        `Deploy continuous auditing systems to track execution metrics.`,
-        `Refine compliance metrics quarterly to match market developments.`
-      ];
-      pageObj.hasPhoto = true;
-      pageObj.photoQuery = `${topic} brainstorm collaboration`;
-      pageObj.photoCaption = `Figure ${ch.num}.${pageInCurrentChapter}: Joint development and validation mapping.`;
-    }
-
+    layoutCycles[layoutType](pageObj, ch, pageInCurrentChapter);
     pages.push(pageObj);
 
     if (pageInCurrentChapter >= 2) {
@@ -263,9 +310,20 @@ const generateMockPages = (topic, pageCount) => {
     type: 'conclusion',
     title: 'Summary & Strategic Conclusion',
     paragraphs: [
-      `In conclusion, compiling a robust framework for "${topic}" offers a seamless path toward high efficiency and professional communication. By automating structural margins, font systems, and data projections, teams can produce high-impact assets in minutes instead of days.`,
-      `Moving forward, our roadmap includes deeper integration of advanced data pipelines, ensuring that enterprise documentation on "${topic}" remains a living, evolving asset that drives clarity and corporate alignment.`
-    ]
+      `The evidence assembled across this analysis converges on a clear finding: organizations that approach ${topic} with disciplined structure, cross-functional governance, and data-driven accountability consistently outperform those that rely on ad-hoc implementation. The technical and operational dimensions explored in Chapters 2 and 3 demonstrate that the barriers to effective ${topic} practice are rarely technological — they are predominantly organizational, rooted in misaligned incentives, fragmented ownership, and insufficient investment in change management capacity. The case studies reviewed in Chapter 4 further reinforce this conclusion, showing that technology alone accounts for less than 30% of variance in program outcomes, with human and process factors explaining the remainder.`,
+      `Forward-looking organizations must treat ${topic} capability as a strategic asset requiring continuous investment rather than a one-time project with a defined end state. The three strategic priorities outlined below reflect the most actionable synthesis of findings, calibrated to the reality that organizations face genuine resource constraints and must sequence their investments for maximum cumulative impact. Execution of these recommendations should be anchored by quarterly performance reviews against agreed KPIs, with built-in mechanisms for adaptive recalibration as market conditions and stakeholder requirements evolve over the planning horizon.`,
+    ],
+    strategicPriorities: [
+      { priority: 'Short-term (0–12 months)', action: `Conduct a comprehensive ${topic} maturity assessment, establish a cross-functional governance committee, and deliver three high-visibility pilot implementations to build organizational confidence and institutional learning.` },
+      { priority: 'Medium-term (1–3 years)', action: `Scale proven ${topic} frameworks enterprise-wide, integrate performance monitoring dashboards into existing management reporting cycles, and develop internal capability through structured training and communities of practice.` },
+      { priority: 'Long-term (3–5 years)', action: `Position ${topic} competency as a competitive differentiator through external thought leadership, industry partnerships, and continuous innovation investment aligned to emerging research and regulatory developments.` },
+    ],
+    conclusionImage: {
+      photoQuery: `horizon, growth, future, achievement, sunrise, modern`,
+      photoAlt: 'Forward-looking image symbolising growth, achievement and strategic horizon',
+      photoCaption: `Strategic execution of the recommendations in this document positions organisations to capture the full value potential of ${topic} over a five-year horizon.`,
+      photoSize: 'wide',
+    },
   });
 
   // 6. References
@@ -273,15 +331,18 @@ const generateMockPages = (topic, pageCount) => {
     type: 'references',
     title: 'References & Bibliography',
     references: [
-      `"${topic}" Standards Board. (2026). Strategic Frameworks for Asset Formatting. New York, NY: Enterprise Press.`,
-      `Smith, A. R., & Doe, J. E. (2025). Principles of Dynamic Layout Systems in ${topic}. Journal of Systemics, 14(2), 112-128.`,
-      `Wilson, K. L. (2025). The Power of Visual Vector Graphics in ${topic} Documents. Computer Graphics Review, 39(4), 45-56.`,
-      `DocForge AI Documentation. (2026). LLM Document Architect Reference API. Mountain View, CA: Tech Press.`
-    ]
+      `Anderson, R. T., & Patel, S. K. (2024). Governance frameworks for scalable ${topic} implementation in enterprise environments. Journal of Strategic Management, 41(3), 218–247. https://doi.org/10.xxxx/jsm.2024.41.3.218`,
+      `Chen, L., Morrison, D. A., & Fitzgerald, W. (2023). Measuring ${topic} maturity: A validated diagnostic instrument for organizational self-assessment. International Journal of Operations Management, 29(2), 88–115. https://doi.org/10.xxxx/ijom.2023.29.2.88`,
+      `Global Strategy Institute. (2025). State of ${topic}: Annual benchmarking report 2025. GSI Publications. https://www.gsi.org/reports/2025`,
+      `Hassan, F. M., & Okonkwo, C. J. (2024). Change management as a determinant of ${topic} program success: A meta-analytic review. Academy of Management Review, 49(1), 54–79. https://doi.org/10.xxxx/amr.2024.49.1.54`,
+      `Nguyen, T. A., & Rosberg, E. (2023). Data-driven accountability in ${topic} transformation programs. Harvard Business Review Analytics, 12(4), 31–44.`,
+      `World Economic Forum. (2024). The ${topic} imperative: Strategic priorities for the decade ahead. WEF Industry Reports. https://www.weforum.org/reports/topic-imperative-2024`,
+    ],
   });
 
   return pages;
 };
+
 
 export default function App() {
   // --- UI State Management ---
@@ -1314,21 +1375,35 @@ export default function App() {
 
                 // PAGE 1: TITLE/COVER PAGE
                 if (page.type === 'cover') {
+                  const heroImg = page.heroImage ? resolveImage({ ...page.heroImage, photoSize: 'hero' }) : null;
                   return (
                     <section key={pageIdx} className="page page-cover">
                       <div className="cover-header-brand" contentEditable={editMode} suppressContentEditableWarning onBlur={(e) => updateContent(pageIdx, 'classification', e.target.innerText)}>{page.classification || 'INTERNAL DRAFT'}</div>
-                      
+
+                      {/* Hero Image */}
+                      {heroImg && (
+                        <div className="cover-hero-image-wrap">
+                          <img
+                            src={heroImg.src}
+                            alt={heroImg.alt || 'Cover hero image'}
+                            className="cover-hero-img"
+                            onError={(e) => { e.target.onerror = null; e.target.src = heroImg.fallback; }}
+                          />
+                          <div className="cover-hero-overlay" />
+                        </div>
+                      )}
+
                       <div className="cover-main-content">
                         <div className="cover-divider"></div>
-                        <h1 
-                          className="cover-title" 
-                          contentEditable={editMode} 
+                        <h1
+                          className="cover-title"
+                          contentEditable={editMode}
                           suppressContentEditableWarning
                           onBlur={(e) => updateContent(pageIdx, 'title', e.target.innerText)}
                         >
                           {page.title}
                         </h1>
-                        <p 
+                        <p
                           className="cover-subtitle"
                           contentEditable={editMode}
                           suppressContentEditableWarning
@@ -1336,30 +1411,28 @@ export default function App() {
                         >
                           {page.subtitle}
                         </p>
-                        
-                        {/* Cover Image Illustration */}
-                        <div className="cover-graphic-container">
-                          <img 
-                            src={getCoverPhoto()} 
-                            alt="Cover theme graphic" 
-                            className="cover-graphic-img" 
-                          />
-                        </div>
+                        {page.abstract && (
+                          <p className="cover-abstract" contentEditable={editMode} suppressContentEditableWarning onBlur={(e) => updateContent(pageIdx, 'abstract', e.target.innerText)}>
+                            {page.abstract}
+                          </p>
+                        )}
                       </div>
 
                       <div className="cover-meta">
                         <div className="meta-item">
-                          <span className="meta-label">Author/Publisher</span>
-                          <span className="meta-value" contentEditable={editMode} suppressContentEditableWarning onBlur={(e) => updateContent(pageIdx, 'author', e.target.innerText)}>{page.author || 'DocForge Synthesis'}</span>
+                          <span className="meta-label">Author / Publisher</span>
+                          <span className="meta-value" contentEditable={editMode} suppressContentEditableWarning onBlur={(e) => updateContent(pageIdx, 'authors', e.target.innerText)}>{page.authors || page.author || 'DocForge Synthesis'}</span>
                         </div>
                         <div className="meta-item">
                           <span className="meta-label">Publish Date</span>
                           <span className="meta-value" contentEditable={editMode} suppressContentEditableWarning onBlur={(e) => updateContent(pageIdx, 'dateStr', e.target.innerText)}>{page.dateStr}</span>
                         </div>
-                        <div className="meta-item" style={{ marginTop: '10px' }}>
-                          <span className="meta-label">Release Version</span>
-                          <span className="meta-value" contentEditable={editMode} suppressContentEditableWarning onBlur={(e) => updateContent(pageIdx, 'version', e.target.innerText)}>{page.version || 'v1.0.0'}</span>
-                        </div>
+                        {(page.version || page.classification) && (
+                          <div className="meta-item">
+                            <span className="meta-label">Classification</span>
+                            <span className="meta-value">{page.classification || ('v' + (page.version || '1.0.0'))}</span>
+                          </div>
+                        )}
                       </div>
                     </section>
                   );
@@ -1367,25 +1440,37 @@ export default function App() {
 
                 // PAGE 2: TABLE OF CONTENTS PAGE
                 if (page.type === 'toc') {
-                  const tocItems = getTOCItems();
+                  // Prefer structured entries from AI; fall back to computed TOC
+                  const tocEntries = (page.entries && page.entries.length > 0)
+                    ? page.entries
+                    : getTOCItems().map(item => ({ label: item.title, page: item.pageIndex }));
+                  const tocImg = page.tocImage ? resolveImage({ ...page.tocImage, photoSize: 'inline' }) : null;
                   return (
                     <section key={pageIdx} className="page">
                       <div className="page-header">
                         <span>{topic}</span>
                         <span>Table of Contents</span>
                       </div>
-                      
+
                       <div className="page-content" style={{ marginTop: '40px' }}>
                         <h2 className="page-toc-title" contentEditable={editMode} suppressContentEditableWarning onBlur={(e) => updateContent(pageIdx, 'title', e.target.innerText)}>{page.title}</h2>
-                        
+
                         <ul className="toc-list">
-                          {tocItems.map((item, itemIdx) => (
+                          {tocEntries.map((item, itemIdx) => (
                             <li key={itemIdx} className="toc-item">
-                              <span className="toc-item-title">{item.title}</span>
-                              <span className="toc-item-page">{item.pageIndex}</span>
+                              <span className="toc-item-title">{item.label || item.title}</span>
+                              <span className="toc-item-page">{item.page || item.pageIndex}</span>
                             </li>
                           ))}
                         </ul>
+
+                        {tocImg && (
+                          <div className="document-photo-container" style={{ marginTop: '24px' }}>
+                            <img src={tocImg.src} alt={tocImg.alt} className="document-photo" style={{ height: '120px', objectFit: 'cover' }}
+                              onError={(e) => { e.target.onerror = null; e.target.src = tocImg.fallback; }} />
+                            {tocImg.caption && <div className="photo-caption">{tocImg.caption}</div>}
+                          </div>
+                        )}
                       </div>
 
                       <div className="page-footer">
@@ -1398,20 +1483,29 @@ export default function App() {
 
                 // PAGE 3: PREFACE PAGE
                 if (page.type === 'preface') {
+                  const prefaceImg = page.prefaceImage ? resolveImage({ ...page.prefaceImage, photoSize: page.prefaceImage.photoSize || 'wide' }) : null;
                   return (
                     <section key={pageIdx} className="page">
                       <div className="page-header">
                         <span>{topic}</span>
-                        <span>Preface & Scope</span>
+                        <span>Preface &amp; Scope</span>
                       </div>
 
                       <div className="page-content" style={{ marginTop: '40px' }}>
                         <div className="chapter-header-badge">Executive Prologue</div>
                         <h2 className="page-chapter-title" contentEditable={editMode} suppressContentEditableWarning onBlur={(e) => updateContent(pageIdx, 'title', e.target.innerText)}>{page.title}</h2>
-                        
+
+                        {prefaceImg && (
+                          <div className="document-photo-container" style={{ marginBottom: '16px' }}>
+                            <img src={prefaceImg.src} alt={prefaceImg.alt} className="document-photo" style={{ width: '100%', height: '160px', objectFit: 'cover' }}
+                              onError={(e) => { e.target.onerror = null; e.target.src = prefaceImg.fallback; }} />
+                            {prefaceImg.caption && <div className="photo-caption">{prefaceImg.caption}</div>}
+                          </div>
+                        )}
+
                         {page.paragraphs && page.paragraphs.map((para, paraIdx) => (
-                          <p 
-                            key={paraIdx} 
+                          <p
+                            key={paraIdx}
                             className={`page-paragraph ${paraIdx === 0 ? 'drop-cap' : ''}`}
                             contentEditable={editMode}
                             suppressContentEditableWarning
@@ -1420,6 +1514,17 @@ export default function App() {
                             {para}
                           </p>
                         ))}
+
+                        {page.keyFindings && page.keyFindings.length > 0 && (
+                          <div className="key-findings-box">
+                            <div className="key-findings-title">Key Findings</div>
+                            <ul className="key-findings-list">
+                              {page.keyFindings.map((finding, fIdx) => (
+                                <li key={fIdx} className="key-findings-item">{finding}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </div>
 
                       <div className="page-footer">
@@ -1430,8 +1535,18 @@ export default function App() {
                   );
                 }
 
-                // CHAPTER PAGES (Standard dynamic layouts)
+                // CHAPTER PAGES
                 if (page.type === 'chapter-page') {
+                  const openerImg = page.chapterOpenerImage ? resolveImage({ ...page.chapterOpenerImage, photoSize: 'wide' }) : null;
+                  const inlineImg = page.inlineImage ? resolveImage({ ...page.inlineImage, photoSize: page.inlineImage.photoSize || 'inline' }) : null;
+                  const inlinePos = page.inlineImage?.position || 'right';
+                  const pairA = page.imagePair?.imageA ? resolveImage({ ...page.imagePair.imageA, photoSize: 'thumbnail' }) : null;
+                  const pairB = page.imagePair?.imageB ? resolveImage({ ...page.imagePair.imageB, photoSize: 'thumbnail' }) : null;
+
+                  // Dynamic table headers: new schema (dimension/current/target/gap) or old (metric/baseline/target)
+                  const tHeaders = page.tableHeaders || ['Analysis Metric', 'Baseline', 'Target Goal'];
+                  const isNewTableSchema = page.tableRows && page.tableRows[0] && 'dimension' in page.tableRows[0];
+
                   return (
                     <section key={pageIdx} className="page">
                       <div className="page-header">
@@ -1441,7 +1556,7 @@ export default function App() {
 
                       <div className="page-content" style={{ marginTop: '45px' }}>
                         <div className="chapter-header-badge">Chapter {page.chapterIndex || 1}</div>
-                        <h2 
+                        <h2
                           className="page-chapter-title"
                           contentEditable={editMode}
                           suppressContentEditableWarning
@@ -1450,9 +1565,25 @@ export default function App() {
                           {page.chapterTitle}
                         </h2>
 
+                        {page.sectionHeading && (
+                          <h3 className="page-section-heading" contentEditable={editMode} suppressContentEditableWarning
+                            onBlur={(e) => updateContent(pageIdx, 'sectionHeading', e.target.innerText)}>
+                            {page.sectionHeading}
+                          </h3>
+                        )}
+
+                        {/* Chapter Opener (wide) Image */}
+                        {openerImg && (
+                          <div className="document-photo-container" style={{ marginBottom: '14px' }}>
+                            <img src={openerImg.src} alt={openerImg.alt} className="document-photo" style={{ width: '100%', height: '160px', objectFit: 'cover' }}
+                              onError={(e) => { e.target.onerror = null; e.target.src = openerImg.fallback; }} />
+                            {openerImg.caption && <div className="photo-caption">{openerImg.caption}</div>}
+                          </div>
+                        )}
+
                         {page.paragraphs && page.paragraphs.map((para, paraIdx) => (
-                          <p 
-                            key={paraIdx} 
+                          <p
+                            key={paraIdx}
                             className="page-paragraph"
                             contentEditable={editMode}
                             suppressContentEditableWarning
@@ -1462,73 +1593,97 @@ export default function App() {
                           </p>
                         ))}
 
-                        {/* Callout Box Feature */}
+                        {/* Callout Box */}
                         {page.hasCallout && page.calloutText && (
-                          <div 
-                            className="callout-box"
-                            contentEditable={editMode}
-                            suppressContentEditableWarning
-                            onBlur={(e) => updateContent(pageIdx, 'calloutText', e.target.innerText)}
-                          >
+                          <div className="callout-box" contentEditable={editMode} suppressContentEditableWarning
+                            onBlur={(e) => updateContent(pageIdx, 'calloutText', e.target.innerText)}>
                             {page.calloutText}
                           </div>
                         )}
 
-                        {/* Custom Lists Feature */}
-                        {page.hasList && page.listItems && (
-                          <ul className="custom-list">
-                            {page.listItems.map((item, itemIdx) => (
-                              <li 
-                                key={itemIdx} 
-                                className="custom-list-item"
-                                contentEditable={editMode}
-                                suppressContentEditableWarning
-                                onBlur={(e) => updateContent(pageIdx, 'listItems', e.target.innerText, itemIdx, true)}
-                              >
-                                {item}
-                              </li>
-                            ))}
-                          </ul>
+                        {/* Inline Image (position: left | right | full-width) */}
+                        {inlineImg && (
+                          <div className={`inline-image-wrap inline-image-${inlinePos}`}>
+                            <img src={inlineImg.src} alt={inlineImg.alt} className="document-photo"
+                              onError={(e) => { e.target.onerror = null; e.target.src = inlineImg.fallback; }} />
+                            {inlineImg.caption && <div className="photo-caption">{inlineImg.caption}</div>}
+                          </div>
                         )}
 
-                        {/* Custom Tables Feature */}
-                        {page.hasTable && page.tableRows && (
-                          <table className="custom-table">
-                            <thead>
-                              <tr>
-                                <th>Analysis Metric</th>
-                                <th>Baseline</th>
-                                <th>Target Goal</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {page.tableRows.map((row, rowIdx) => (
-                                <tr key={rowIdx}>
-                                  <td contentEditable={editMode} suppressContentEditableWarning onBlur={(e) => updateContent(pageIdx, 'tableRows', e.target.innerText, null, false, true, rowIdx, 'metric')}>{row.metric}</td>
-                                  <td contentEditable={editMode} suppressContentEditableWarning onBlur={(e) => updateContent(pageIdx, 'tableRows', e.target.innerText, null, false, true, rowIdx, 'baseline')}>{row.baseline}</td>
-                                  <td contentEditable={editMode} suppressContentEditableWarning onBlur={(e) => updateContent(pageIdx, 'tableRows', e.target.innerText, null, false, true, rowIdx, 'target')}>{row.target}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        )}
-
-                        {/* Vector SVG Charts Feature */}
-                        {page.hasChart && page.chartType && renderSVGChart(page.chartType)}
-
-                        {/* Custom Images Feature */}
-                        {page.hasPhoto && (
-                          <div className="document-photo-container">
-                            <img 
-                              src={page.photoUrl || getPhotoUrl(page.photoQuery || topic)} 
-                              alt={page.photoCaption || "Section illustration"} 
-                              className="document-photo" 
-                            />
-                            {page.photoCaption && (
-                              <div style={{ fontSize: '11px', color: '#64748b', marginTop: '6px', textAlign: 'center', fontStyle: 'italic', fontFamily: 'var(--doc-font-body)' }}>
-                                {page.photoCaption}
+                        {/* Image Pair (side-by-side) */}
+                        {pairA && pairB && (
+                          <div style={{ marginTop: '16px' }}>
+                            <div className="image-pair-wrap">
+                              <div className="image-pair-item">
+                                <img src={pairA.src} alt={pairA.alt} className="document-photo" style={{ height: '110px', objectFit: 'cover' }}
+                                  onError={(e) => { e.target.onerror = null; e.target.src = pairA.fallback; }} />
+                                {pairA.caption && <div className="photo-caption">{pairA.caption}</div>}
                               </div>
+                              <div className="image-pair-item">
+                                <img src={pairB.src} alt={pairB.alt} className="document-photo" style={{ height: '110px', objectFit: 'cover' }}
+                                  onError={(e) => { e.target.onerror = null; e.target.src = pairB.fallback; }} />
+                                {pairB.caption && <div className="photo-caption">{pairB.caption}</div>}
+                              </div>
+                            </div>
+                            {page.imagePair?.pairCaption && (
+                              <div className="photo-caption" style={{ marginTop: '6px', textAlign: 'center' }}>{page.imagePair.pairCaption}</div>
                             )}
+                          </div>
+                        )}
+
+                        {/* Structured List */}
+                        {page.hasList && page.listItems && (
+                          <div>
+                            {page.listTitle && <div className="list-title-label">{page.listTitle}</div>}
+                            <ul className="custom-list">
+                              {page.listItems.map((item, itemIdx) => (
+                                <li key={itemIdx} className="custom-list-item" contentEditable={editMode} suppressContentEditableWarning
+                                  onBlur={(e) => updateContent(pageIdx, 'listItems', e.target.innerText, itemIdx, true)}>
+                                  {item}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Dynamic Table (new 4-col schema OR legacy 3-col) */}
+                        {page.hasTable && page.tableRows && (
+                          <div>
+                            {page.tableCaption && <div className="table-caption-label">{page.tableCaption}</div>}
+                            <table className="custom-table">
+                              <thead>
+                                <tr>{tHeaders.map((h, hi) => <th key={hi}>{h}</th>)}</tr>
+                              </thead>
+                              <tbody>
+                                {page.tableRows.map((row, rowIdx) => (
+                                  <tr key={rowIdx}>
+                                    {isNewTableSchema ? (
+                                      <>
+                                        <td>{row.dimension}</td>
+                                        <td>{row.current}</td>
+                                        <td>{row.target}</td>
+                                        {row.gap !== undefined && <td>{row.gap}</td>}
+                                      </>
+                                    ) : (
+                                      <>
+                                        <td>{row.metric}</td>
+                                        <td>{row.baseline}</td>
+                                        <td>{row.target}</td>
+                                      </>
+                                    )}
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+
+                        {/* SVG Charts */}
+                        {page.hasChart && page.chartType && (
+                          <div>
+                            {page.chartTitle && <div className="chart-title-label">{page.chartTitle}</div>}
+                            {renderSVGChart(page.chartType, page.chartData)}
+                            {page.chartCaption && <div className="chart-caption-label">{page.chartCaption}</div>}
                           </div>
                         )}
                       </div>
@@ -1543,6 +1698,7 @@ export default function App() {
 
                 // CONCLUSION PAGE
                 if (page.type === 'conclusion') {
+                  const conclusionImg = page.conclusionImage ? resolveImage({ ...page.conclusionImage, photoSize: page.conclusionImage.photoSize || 'wide' }) : null;
                   return (
                     <section key={pageIdx} className="page">
                       <div className="page-header">
@@ -1553,10 +1709,18 @@ export default function App() {
                       <div className="page-content" style={{ marginTop: '40px' }}>
                         <div className="chapter-header-badge">Strategic Synthesis</div>
                         <h2 className="page-chapter-title" contentEditable={editMode} suppressContentEditableWarning onBlur={(e) => updateContent(pageIdx, 'title', e.target.innerText)}>{page.title}</h2>
-                        
+
+                        {conclusionImg && (
+                          <div className="document-photo-container" style={{ marginBottom: '16px' }}>
+                            <img src={conclusionImg.src} alt={conclusionImg.alt} className="document-photo" style={{ width: '100%', height: '160px', objectFit: 'cover' }}
+                              onError={(e) => { e.target.onerror = null; e.target.src = conclusionImg.fallback; }} />
+                            {conclusionImg.caption && <div className="photo-caption">{conclusionImg.caption}</div>}
+                          </div>
+                        )}
+
                         {page.paragraphs && page.paragraphs.map((para, paraIdx) => (
-                          <p 
-                            key={paraIdx} 
+                          <p
+                            key={paraIdx}
                             className="page-paragraph"
                             contentEditable={editMode}
                             suppressContentEditableWarning
@@ -1565,6 +1729,20 @@ export default function App() {
                             {para}
                           </p>
                         ))}
+
+                        {page.strategicPriorities && page.strategicPriorities.length > 0 && (
+                          <div className="strategic-priorities-box">
+                            <div className="strategic-priorities-title">Strategic Priorities</div>
+                            <div className="strategic-priorities-list">
+                              {page.strategicPriorities.map((sp, spIdx) => (
+                                <div key={spIdx} className="strategic-priority-item">
+                                  <div className="sp-label">{sp.priority}</div>
+                                  <div className="sp-action">{sp.action}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       <div className="page-footer">
