@@ -20,6 +20,59 @@ const ILLUSTRATION_MAP = {
   general: 'https://images.unsplash.com/photo-1557683316-973673baf926?w=1000&auto=format&fit=crop&q=80',
 };
 
+// Rich set of accurate stock photos grouped by topic category
+const TOPIC_IMAGES = {
+  tech: [
+    'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1000&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1000&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1000&auto=format&fit=crop&q=80'
+  ],
+  finance: [
+    'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=1000&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=1000&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1000&auto=format&fit=crop&q=80'
+  ],
+  science: [
+    'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?w=1000&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1507668077129-56e32842fceb?w=1000&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=1000&auto=format&fit=crop&q=80'
+  ],
+  nature: [
+    'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1000&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=1000&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1000&auto=format&fit=crop&q=80'
+  ],
+  business: [
+    'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1000&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1000&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1000&auto=format&fit=crop&q=80'
+  ],
+  education: [
+    'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1000&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=1000&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1000&auto=format&fit=crop&q=80'
+  ],
+  general: [
+    'https://images.unsplash.com/photo-1557683316-973673baf926?w=1000&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=1000&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=1000&auto=format&fit=crop&q=80'
+  ]
+};
+
+const getPhotoUrl = (query) => {
+  const q = (query || '').toLowerCase();
+  let category = 'general';
+  if (q.includes('tech') || q.includes('code') || q.includes('comput') || q.includes('system') || q.includes('network') || q.includes('software')) category = 'tech';
+  else if (q.includes('finance') || q.includes('market') || q.includes('money') || q.includes('stock') || q.includes('business') || q.includes('analysis') || q.includes('strateg')) category = 'business';
+  else if (q.includes('science') || q.includes('lab') || q.includes('chem') || q.includes('bio') || q.includes('research') || q.includes('medic') || q.includes('health')) category = 'science';
+  else if (q.includes('nature') || q.includes('green') || q.includes('environment') || q.includes('forest') || q.includes('tree') || q.includes('earth') || q.includes('garden')) category = 'nature';
+  else if (q.includes('learn') || q.includes('book') || q.includes('educat') || q.includes('school') || q.includes('student') || q.includes('teach')) category = 'education';
+  
+  const list = TOPIC_IMAGES[category] || TOPIC_IMAGES.general;
+  const index = Math.abs(q.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % list.length;
+  return list[index];
+};
+
 // Default high-fidelity sample document displayed on load
 const MOCK_DOCUMENT_PAGES = [
   {
@@ -103,6 +156,133 @@ const MOCK_DOCUMENT_PAGES = [
   }
 ];
 
+// --- High-fidelity Dynamic Offline Generator ---
+const generateMockPages = (topic, pageCount) => {
+  const pages = [];
+  
+  // 1. Cover
+  pages.push({
+    type: 'cover',
+    title: topic,
+    subtitle: 'A Comprehensive Strategic Study and Operational Framework',
+    dateStr: new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }),
+    author: 'DocForge Synthesis Engine',
+    version: 'v1.0.0',
+    classification: 'Official Study Report / Demo Mode'
+  });
+
+  // 2. TOC
+  pages.push({
+    type: 'toc',
+    title: 'Table of Contents'
+  });
+
+  // 3. Preface
+  pages.push({
+    type: 'preface',
+    title: 'Preface & Scope',
+    paragraphs: [
+      `As organizations transition rapidly into intelligence-driven ecosystems, the demand for structured, dynamic, and publication-ready communications regarding "${topic}" has never been higher. This strategic blueprint introduces the foundational principles of "${topic}" compilation architecture designed to automate, customize, and serialize enterprise knowledge assets.`,
+      `Our primary scope encompasses the structural layout, styling mechanics, and systems that permit professionals to compile manuals, research monographs, and strategic reports on "${topic}". Through algorithmic layout enforcement and themed projections, this framework establishes a new benchmark for business communication standards.`
+    ]
+  });
+
+  // 4. Chapter pages (Page 4 to pageCount - 2)
+  const chapters = [
+    { num: 1, title: `Foundations and Core Background of ${topic}` },
+    { num: 2, title: `Technical and Operational Dimensions of ${topic}` },
+    { num: 3, title: `Strategic Implementation and Integration of ${topic}` },
+    { num: 4, title: `Advanced Analytics, Case Studies, and reference models` },
+    { num: 5, title: `Key Stakeholder Alignment and Policy Guidelines` }
+  ];
+
+  const totalChapterPages = pageCount - 4; // Total pages for chapters
+  let currentChapterIdx = 0;
+  let pageInCurrentChapter = 1;
+
+  for (let i = 0; i < totalChapterPages; i++) {
+    const ch = chapters[currentChapterIdx % chapters.length];
+    
+    const pageObj = {
+      type: 'chapter-page',
+      chapterTitle: `Chapter ${ch.num}: ${ch.title}`,
+      chapterIndex: ch.num,
+      pageIndex: pageInCurrentChapter,
+      paragraphs: [
+        `Analyzing the landscape of "${topic}" requires a deep understanding of its functional components. First, teams must map the workflow dependencies that influence production. Unaligned variables can lead to cascading delays, structural conflicts, and compliance errors during execution.`,
+        `By leveraging modern design principles, organizations can standardize their approach to "${topic}". The data gathered during initial phases indicates that structured layout coordinates reduce operational friction by up to 35%, ensuring cross-functional teams operate from a single, unified source of truth.`
+      ]
+    };
+
+    // Cycle layouts (Callout + Photo -> Table -> Flow Chart -> Donut Chart -> List + Photo)
+    const layoutType = i % 5;
+    if (layoutType === 0) {
+      pageObj.hasCallout = true;
+      pageObj.calloutText = `Strategic Quote: "Developing a comprehensive roadmap for ${topic} is essential for achieving long-term operational excellence and organization-wide alignment."`;
+      pageObj.hasPhoto = true;
+      pageObj.photoQuery = `${topic} roadmap system`;
+      pageObj.photoCaption = `Figure ${ch.num}.${pageInCurrentChapter}: Strategic roadmap alignment and milestone check targets.`;
+    } else if (layoutType === 1) {
+      pageObj.hasTable = true;
+      pageObj.tableRows = [
+        { metric: `${topic} Performance`, baseline: '74.2% variance', target: '99.9% aligned' },
+        { metric: 'Average Compile Time', baseline: '12.4 seconds', target: '1.8 seconds (cached)' },
+        { metric: 'Operational Compliance', baseline: '81.0% reliability', target: '100% fail-safe standards' }
+      ];
+    } else if (layoutType === 2) {
+      pageObj.hasChart = true;
+      pageObj.chartType = 'flow-chart';
+    } else if (layoutType === 3) {
+      pageObj.hasChart = true;
+      pageObj.chartType = 'donut-chart';
+    } else if (layoutType === 4) {
+      pageObj.hasList = true;
+      pageObj.listItems = [
+        `Establish clear strategic goals for ${topic} integration.`,
+        `Train operational personnel on core safety and quality protocols.`,
+        `Deploy continuous auditing systems to track execution metrics.`,
+        `Refine compliance metrics quarterly to match market developments.`
+      ];
+      pageObj.hasPhoto = true;
+      pageObj.photoQuery = `${topic} brainstorm collaboration`;
+      pageObj.photoCaption = `Figure ${ch.num}.${pageInCurrentChapter}: Joint development and validation mapping.`;
+    }
+
+    pages.push(pageObj);
+
+    if (pageInCurrentChapter >= 2) {
+      currentChapterIdx++;
+      pageInCurrentChapter = 1;
+    } else {
+      pageInCurrentChapter++;
+    }
+  }
+
+  // 5. Conclusion
+  pages.push({
+    type: 'conclusion',
+    title: 'Summary & Strategic Conclusion',
+    paragraphs: [
+      `In conclusion, compiling a robust framework for "${topic}" offers a seamless path toward high efficiency and professional communication. By automating structural margins, font systems, and data projections, teams can produce high-impact assets in minutes instead of days.`,
+      `Moving forward, our roadmap includes deeper integration of advanced data pipelines, ensuring that enterprise documentation on "${topic}" remains a living, evolving asset that drives clarity and corporate alignment.`
+    ]
+  });
+
+  // 6. References
+  pages.push({
+    type: 'references',
+    title: 'References & Bibliography',
+    references: [
+      `"${topic}" Standards Board. (2026). Strategic Frameworks for Asset Formatting. New York, NY: Enterprise Press.`,
+      `Smith, A. R., & Doe, J. E. (2025). Principles of Dynamic Layout Systems in ${topic}. Journal of Systemics, 14(2), 112-128.`,
+      `Wilson, K. L. (2025). The Power of Visual Vector Graphics in ${topic} Documents. Computer Graphics Review, 39(4), 45-56.`,
+      `DocForge AI Documentation. (2026). LLM Document Architect Reference API. Mountain View, CA: Tech Press.`
+    ]
+  });
+
+  return pages;
+};
+
 export default function App() {
   // --- UI State Management ---
   const [topic, setTopic] = useState('Enterprise Document Automation');
@@ -114,8 +294,11 @@ export default function App() {
   const [alignment, setAlignment] = useState('justify'); // left, center, justify
   const [zoom, setZoom] = useState(0.8);
   const [editMode, setEditMode] = useState(false);
+  const [provider, setProvider] = useState('gemini'); // gemini, openai, or grok
   const [modelName, setModelName] = useState('gemini-2.5-flash');
-  const [customApiKey, setCustomApiKey] = useState('');
+  const [geminiApiKey, setGeminiApiKey] = useState('');
+  const [openaiApiKey, setOpenaiApiKey] = useState('');
+  const [grokApiKey, setGrokApiKey] = useState('');
   
   // --- Generation State ---
   const [pages, setPages] = useState(MOCK_DOCUMENT_PAGES);
@@ -123,16 +306,41 @@ export default function App() {
   const [generationProgress, setGenerationProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Save/Load API Key from localStorage
+  // Save/Load API Keys from localStorage
   useEffect(() => {
-    const savedKey = localStorage.getItem('docforge_api_key');
-    if (savedKey) setCustomApiKey(savedKey);
+    const savedGeminiKey = localStorage.getItem('docforge_gemini_api_key') || localStorage.getItem('docforge_api_key') || '';
+    const savedOpenaiKey = localStorage.getItem('docforge_openai_api_key') || '';
+    const savedGrokKey = localStorage.getItem('docforge_grok_api_key') || '';
+    
+    if (savedGeminiKey) setGeminiApiKey(savedGeminiKey);
+    if (savedOpenaiKey) setOpenaiApiKey(savedOpenaiKey);
+    if (savedGrokKey) setGrokApiKey(savedGrokKey);
   }, []);
 
-  const handleApiKeyChange = (e) => {
-    const val = e.target.value;
-    setCustomApiKey(val);
-    localStorage.setItem('docforge_api_key', val);
+  const handleProviderChange = (newProvider) => {
+    setProvider(newProvider);
+    if (newProvider === 'gemini') {
+      setModelName('gemini-2.5-flash');
+    } else if (newProvider === 'openai') {
+      setModelName('gpt-4o-mini');
+    } else if (newProvider === 'grok') {
+      setModelName('grok-2');
+    }
+  };
+
+  const handleGeminiKeyChange = (val) => {
+    setGeminiApiKey(val);
+    localStorage.setItem('docforge_gemini_api_key', val);
+  };
+
+  const handleOpenaiKeyChange = (val) => {
+    setOpenaiApiKey(val);
+    localStorage.setItem('docforge_openai_api_key', val);
+  };
+
+  const handleGrokKeyChange = (val) => {
+    setGrokApiKey(val);
+    localStorage.setItem('docforge_grok_api_key', val);
   };
 
   // Sync state modifications with CSS custom properties
@@ -199,8 +407,23 @@ export default function App() {
     setGenerationProgress(10);
 
     const progressInterval = setInterval(() => {
-      setGenerationProgress(prev => (prev < 90 ? prev + 8 : prev));
-    }, 1500);
+      setGenerationProgress(prev => (prev < 90 ? (provider === 'mock' ? prev + 15 : prev + 8) : prev));
+    }, provider === 'mock' ? 300 : 1500);
+
+    if (provider === 'mock') {
+      setTimeout(() => {
+        clearInterval(progressInterval);
+        setGenerationProgress(100);
+        
+        const mockPages = generateMockPages(topic, pageCount);
+        
+        setTimeout(() => {
+          setPages(mockPages);
+          setIsGenerating(false);
+        }, 300);
+      }, 1500);
+      return;
+    }
 
     try {
       const response = await fetch('/api/generate', {
@@ -212,7 +435,8 @@ export default function App() {
           topic,
           pageCount,
           modelName,
-          customApiKey
+          customApiKey: provider === 'gemini' ? geminiApiKey : (provider === 'openai' ? openaiApiKey : grokApiKey),
+          provider
         })
       });
 
@@ -287,11 +511,65 @@ export default function App() {
     const originalZoom = zoom;
     const canvasPages = element.querySelectorAll('.page');
 
-    // 1. Temporarily disable zoom, border styles, and spacing
-    setZoom(1.0);
+    // 1. Temporarily disable zoom, border styles, and spacing in DOM
+    // DO NOT call setZoom(1.0) to prevent React from re-rendering and detaching active DOM nodes!
     document.documentElement.style.setProperty('--zoom-factor', '1');
     element.classList.add('pdf-mode');
     canvasPages.forEach(p => p.classList.add('pdf-page-break'));
+
+    // 2. Temporarily inline CSS variables with computed static values
+    const elementsWithVars = element.querySelectorAll('*');
+    const originalStyles = [];
+    const allElements = [element, ...Array.from(elementsWithVars)];
+
+    allElements.forEach(el => {
+      const computed = window.getComputedStyle(el);
+      const styleToApply = {};
+
+      // Check and copy styles that use custom variables to static values
+      if (computed.padding && computed.padding !== '0px') {
+        styleToApply.padding = computed.padding;
+      }
+      if (computed.fontFamily) {
+        styleToApply.fontFamily = computed.fontFamily;
+      }
+      if (computed.textAlign) {
+        styleToApply.textAlign = computed.textAlign;
+      }
+      if (computed.color && (
+        el.classList.contains('cover-header-brand') || 
+        el.classList.contains('toc-item-page') || 
+        el.classList.contains('chapter-header-badge') ||
+        el.classList.contains('custom-list-item')
+      )) {
+        styleToApply.color = computed.color;
+      }
+      if (computed.backgroundColor && (
+        el.classList.contains('cover-divider') ||
+        el.classList.contains('legend-color')
+      )) {
+        styleToApply.backgroundColor = computed.backgroundColor;
+      }
+      if (computed.borderBottomStyle && computed.borderBottomStyle !== 'none' && computed.borderBottomWidth !== '0px') {
+        styleToApply.borderBottom = computed.borderBottom;
+      }
+      if (computed.borderLeftStyle && computed.borderLeftStyle !== 'none' && computed.borderLeftWidth !== '0px') {
+        styleToApply.borderLeft = computed.borderLeft;
+      }
+      if (computed.left && computed.left !== 'auto') {
+        styleToApply.left = computed.left;
+      }
+      if (computed.right && computed.right !== 'auto') {
+        styleToApply.right = computed.right;
+      }
+
+      originalStyles.push({
+        el,
+        styleAttr: el.getAttribute('style')
+      });
+
+      Object.assign(el.style, styleToApply);
+    });
 
     const cleanFilename = topic.toLowerCase().replace(/[^a-z0-9]+/g, '_') || 'document';
     const opt = {
@@ -308,25 +586,35 @@ export default function App() {
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // 2. Generate PDF via html2pdf using standard layout triggers
-    window.html2pdf()
-      .from(element)
-      .set(opt)
-      .save()
-      .then(() => {
-        // 3. Restore visual workspace properties
-        setZoom(originalZoom);
-        document.documentElement.style.setProperty('--zoom-factor', originalZoom.toString());
-        element.classList.remove('pdf-mode');
-        canvasPages.forEach(p => p.classList.remove('pdf-page-break'));
-      })
-      .catch(err => {
-        console.error('PDF Generation Error:', err);
-        setZoom(originalZoom);
-        document.documentElement.style.setProperty('--zoom-factor', originalZoom.toString());
-        element.classList.remove('pdf-mode');
-        canvasPages.forEach(p => p.classList.remove('pdf-page-break'));
+    const restoreStyles = () => {
+      // Restore styles
+      originalStyles.forEach(item => {
+        if (item.styleAttr === null) {
+          item.el.removeAttribute('style');
+        } else {
+          item.el.setAttribute('style', item.styleAttr);
+        }
       });
+      // Restore zoom and layouts directly in DOM
+      document.documentElement.style.setProperty('--zoom-factor', originalZoom.toString());
+      element.classList.remove('pdf-mode');
+      canvasPages.forEach(p => p.classList.remove('pdf-page-break'));
+    };
+
+    // 3. Generate PDF via html2pdf after a small timeout to let the browser reflow styles and transform scales
+    setTimeout(() => {
+      window.html2pdf()
+        .from(element)
+        .set(opt)
+        .save()
+        .then(() => {
+          restoreStyles();
+        })
+        .catch(err => {
+          console.error('PDF Generation Error:', err);
+          restoreStyles();
+        });
+    }, 250);
   };
 
   // --- HTML Export Handler (Standalone styling integration) ---
@@ -603,6 +891,84 @@ export default function App() {
         </div>
       );
     }
+
+    if (type === 'flow-chart') {
+      return (
+        <div className="chart-container">
+          <div className="chart-title">System Execution Sequence / Work Flow</div>
+          <svg className="chart-svg" viewBox="0 0 400 150">
+            <defs>
+              <linearGradient id="flowGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor={accentColor} />
+                <stop offset="100%" stopColor={accentColor} stopOpacity="0.8" />
+              </linearGradient>
+            </defs>
+            {/* Step 1 */}
+            <rect x="10" y="45" width="80" height="50" rx="6" fill="url(#flowGrad)" stroke={accentColor} strokeWidth="1" />
+            <text x="50" y="70" fontSize="9" fill="#ffffff" textAnchor="middle" fontWeight="bold">Phase 1</text>
+            <text x="50" y="82" fontSize="7" fill="#ffffff" textAnchor="middle">Initial Analysis</text>
+            
+            {/* Arrow 1 */}
+            <path d="M 95 70 L 108 70" stroke="#cbd5e1" strokeWidth="2" fill="none" />
+            <polygon points="108,67 115,70 108,73" fill="#cbd5e1" />
+
+            {/* Step 2 */}
+            <rect x="120" y="45" width="80" height="50" rx="6" fill="#f8fafc" stroke={accentColor} strokeWidth="1.5" />
+            <text x="160" y="70" fontSize="9" fill={accentColor} textAnchor="middle" fontWeight="bold">Phase 2</text>
+            <text x="160" y="82" fontSize="7" fill="#475569" textAnchor="middle">Core Processing</text>
+
+            {/* Arrow 2 */}
+            <path d="M 205 70 L 218 70" stroke="#cbd5e1" strokeWidth="2" fill="none" />
+            <polygon points="218,67 225,70 218,73" fill="#cbd5e1" />
+
+            {/* Step 3 */}
+            <rect x="230" y="45" width="80" height="50" rx="6" fill="url(#flowGrad)" stroke={accentColor} strokeWidth="1" />
+            <text x="270" y="70" fontSize="9" fill="#ffffff" textAnchor="middle" fontWeight="bold">Phase 3</text>
+            <text x="270" y="82" fontSize="7" fill="#ffffff" textAnchor="middle">Synthesis</text>
+
+            {/* Arrow 3 */}
+            <path d="M 315 70 L 328 70" stroke="#cbd5e1" strokeWidth="2" fill="none" />
+            <polygon points="328,67 335,70 328,73" fill="#cbd5e1" />
+
+            {/* Step 4 */}
+            <rect x="340" y="45" width="50" height="50" rx="6" fill="#0f172a" />
+            <text x="365" y="70" fontSize="9" fill="#ffffff" textAnchor="middle" fontWeight="bold">Phase 4</text>
+            <text x="365" y="82" fontSize="7" fill="#10b981" textAnchor="middle" fontWeight="bold">Final Output</text>
+          </svg>
+        </div>
+      );
+    }
+
+    if (type === 'donut-chart') {
+      return (
+        <div className="chart-container">
+          <div className="chart-title">Resource Distribution Breakdown</div>
+          <svg className="chart-svg" viewBox="0 0 400 150">
+            <circle cx="120" cy="75" r="40" fill="none" stroke="#e2e8f0" strokeWidth="18" />
+            <circle cx="120" cy="75" r="40" fill="none" stroke={accentColor} strokeWidth="18" strokeDasharray="251.2" strokeDashoffset="75.3" transform="rotate(-90 120 75)" />
+            <circle cx="120" cy="75" r="40" fill="none" stroke="#10b981" strokeWidth="18" strokeDasharray="251.2" strokeDashoffset="200.9" transform="rotate(20 120 75)" />
+            
+            <text x="120" y="72" fontSize="10" fill="#0f172a" textAnchor="middle" fontWeight="bold">100%</text>
+            <text x="120" y="83" fontSize="6" fill="#94a3b8" textAnchor="middle" fontWeight="bold">Allocated</text>
+            
+            <g transform="translate(220, 35)">
+              <g className="legend-item">
+                <rect x="0" y="5" width="8" height="8" rx="2" fill={accentColor} />
+                <text x="15" y="12" fontSize="8.5" fill="#334155" fontWeight="bold">70% - Core Processes</text>
+              </g>
+              <g className="legend-item" transform="translate(0, 20)">
+                <rect x="0" y="5" width="8" height="8" rx="2" fill="#10b981" />
+                <text x="15" y="12" fontSize="8.5" fill="#334155" fontWeight="bold">20% - Automated Validation</text>
+              </g>
+              <g className="legend-item" transform="translate(0, 40)">
+                <rect x="0" y="5" width="8" height="8" rx="2" fill="#cbd5e1" />
+                <text x="15" y="12" fontSize="8.5" fill="#334155" fontWeight="bold">10% - System Latency</text>
+              </g>
+            </g>
+          </svg>
+        </div>
+      );
+    }
     
     // Fallback Bar Chart
     return (
@@ -619,13 +985,13 @@ export default function App() {
           <rect x="150" y="30" width="36" height="100" rx="3" fill={accentColor} />
           <rect x="230" y="80" width="36" height="50" rx="3" fill={accentColor} opacity="0.6" />
           <rect x="310" y="45" width="36" height="85" rx="3" fill={accentColor} opacity="0.9" />
-
+ 
           {/* Bar Values */}
           <text x="88" y="44" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold">62%</text>
           <text x="168" y="24" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold">80%</text>
           <text x="248" y="74" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold">38%</text>
           <text x="328" y="39" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold">68%</text>
-
+ 
           {/* X Axis Labels */}
           <text x="88" y="143" fontSize="9" fill="#94a3b8" textAnchor="middle">Automation</text>
           <text x="168" y="143" fontSize="9" fill="#94a3b8" textAnchor="middle">Precision</text>
@@ -765,32 +1131,108 @@ export default function App() {
           <div className="section-title">Credentials & Power Tools</div>
 
           <div className="form-group">
-            <label htmlFor="customApiKey">Google Gemini API Key (Optional)</label>
-            <input 
-              id="customApiKey"
-              type="password" 
-              className="input-text" 
-              value={customApiKey}
-              onChange={handleApiKeyChange}
-              placeholder="Configure in .env or paste here..."
-            />
-            <span style={{ fontSize: '10px', color: '#64748b', display: 'block', marginTop: '4px' }}>
-              Note: Key is saved securely only in local browser cache.
-            </span>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="modelName">Gemini LLM Engine</label>
-            <select 
-              id="modelName" 
-              className="select-input" 
-              value={modelName}
-              onChange={(e) => setModelName(e.target.value)}
+            <label htmlFor="provider">LLM Provider</label>
+            <select
+              id="provider"
+              className="select-input"
+              value={provider}
+              onChange={(e) => handleProviderChange(e.target.value)}
             >
-              <option value="gemini-2.5-flash">Gemini 2.5 Flash (Super Fast)</option>
-              <option value="gemini-2.5-pro">Gemini 2.5 Pro (Deep Logic)</option>
+              <option value="gemini">Google Gemini</option>
+              <option value="openai">OpenAI</option>
+              <option value="grok">Grok (xAI)</option>
+              <option value="mock">Offline Demo Mode (No Key Needed)</option>
             </select>
           </div>
+
+          {provider === 'gemini' && (
+            <div className="form-group">
+              <label htmlFor="geminiApiKey">Google Gemini API Key (Optional)</label>
+              <input 
+                id="geminiApiKey"
+                type="password" 
+                className="input-text" 
+                value={geminiApiKey}
+                onChange={(e) => handleGeminiKeyChange(e.target.value)}
+                placeholder="Configure in .env or paste here..."
+              />
+              <span style={{ fontSize: '10px', color: '#64748b', display: 'block', marginTop: '4px' }}>
+                Note: Key is saved securely only in local browser cache.
+              </span>
+            </div>
+          )}
+
+          {provider === 'openai' && (
+            <div className="form-group">
+              <label htmlFor="openaiApiKey">OpenAI API Key (Optional)</label>
+              <input 
+                id="openaiApiKey"
+                type="password" 
+                className="input-text" 
+                value={openaiApiKey}
+                onChange={(e) => handleOpenaiKeyChange(e.target.value)}
+                placeholder="Configure in .env or paste here..."
+              />
+              <span style={{ fontSize: '10px', color: '#64748b', display: 'block', marginTop: '4px' }}>
+                Note: Key is saved securely only in local browser cache.
+              </span>
+            </div>
+          )}
+
+          {provider === 'grok' && (
+            <div className="form-group">
+              <label htmlFor="grokApiKey">Grok (xAI) API Key (Optional)</label>
+              <input 
+                id="grokApiKey"
+                type="password" 
+                className="input-text" 
+                value={grokApiKey}
+                onChange={(e) => handleGrokKeyChange(e.target.value)}
+                placeholder="Configure in .env or paste here..."
+              />
+              <span style={{ fontSize: '10px', color: '#64748b', display: 'block', marginTop: '4px' }}>
+                Note: Key is saved securely only in local browser cache.
+              </span>
+            </div>
+          )}
+
+          {provider === 'mock' && (
+            <div className="form-group">
+              <span style={{ fontSize: '12px', color: '#10b981', fontWeight: '500', display: 'block', padding: '10px', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderRadius: '6px', border: '1px solid rgba(16, 185, 129, 0.2)', lineHeight: '1.4' }}>
+                ✓ Offline Demo Mode: No API keys required. All document pages are simulated locally.
+              </span>
+            </div>
+          )}
+
+          {provider !== 'mock' && (
+            <div className="form-group">
+              <label htmlFor="modelName">{provider === 'gemini' ? 'Gemini' : (provider === 'openai' ? 'OpenAI' : 'Grok')} LLM Engine</label>
+              <select 
+                id="modelName" 
+                className="select-input" 
+                value={modelName}
+                onChange={(e) => setModelName(e.target.value)}
+              >
+                {provider === 'gemini' ? (
+                  <>
+                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (Super Fast)</option>
+                    <option value="gemini-2.5-pro">Gemini 2.5 Pro (Deep Logic)</option>
+                  </>
+                ) : provider === 'openai' ? (
+                  <>
+                    <option value="gpt-4o-mini">GPT-4o Mini (Fast & Cost-Efficient)</option>
+                    <option value="gpt-4o">GPT-4o (High Intelligence)</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="grok-2">Grok 2 (High Performance)</option>
+                    <option value="grok-beta">Grok Beta (Experimental)</option>
+                  </>
+                )}
+              </select>
+            </div>
+          )}
+
 
           <div className="switch-container">
             <span style={{ fontSize: '13px', fontWeight: '500' }}>Enable Canvas Inline Editing</span>
@@ -1073,6 +1515,22 @@ export default function App() {
 
                         {/* Vector SVG Charts Feature */}
                         {page.hasChart && page.chartType && renderSVGChart(page.chartType)}
+
+                        {/* Custom Images Feature */}
+                        {page.hasPhoto && (
+                          <div className="document-photo-container">
+                            <img 
+                              src={page.photoUrl || getPhotoUrl(page.photoQuery || topic)} 
+                              alt={page.photoCaption || "Section illustration"} 
+                              className="document-photo" 
+                            />
+                            {page.photoCaption && (
+                              <div style={{ fontSize: '11px', color: '#64748b', marginTop: '6px', textAlign: 'center', fontStyle: 'italic', fontFamily: 'var(--doc-font-body)' }}>
+                                {page.photoCaption}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       <div className="page-footer">

@@ -19,27 +19,45 @@ app.use(express.json());
 
 // API route to generate document pages using Google Gemini API
 app.post('/api/generate', async (req, res) => {
-  const { topic, pageCount, modelName, customApiKey } = req.body;
+  const { topic, pageCount, modelName, customApiKey, provider } = req.body;
 
   if (!topic || !pageCount) {
     return res.status(400).json({ error: 'Topic and page count are required.' });
   }
 
-  // Use custom API Key if provided, fallback to server environment key
-  const apiKey = customApiKey || process.env.GEMINI_API_KEY;
+  // Determine LLM provider and appropriate key
+  const isOpenAI = provider === 'openai';
+  const isGrok = provider === 'grok';
+  const apiKey = customApiKey || (isGrok ? process.env.GROK_API_KEY : isOpenAI ? process.env.OPENAI_API_KEY : process.env.GEMINI_API_KEY);
+
+  const keyLog = apiKey ? `${apiKey.substring(0, 6)}...${apiKey.slice(-4)}` : 'None';
+  const sourceLog = customApiKey ? 'Client Custom Key' : 'Server Env Key';
+  const logMessage = `[${new Date().toISOString()}] Provider: ${provider || 'Gemini'}, Topic: "${topic}", Pages: ${pageCount}, Model: ${modelName || 'default'}, Key Source: ${sourceLog} (${keyLog})\n`;
+
+  try {
+    import('fs').then(fs => fs.appendFileSync('server.log', logMessage));
+  } catch (e) {
+    console.error('Failed to write log to file:', e);
+  }
+  console.log(logMessage.trim());
 
   if (!apiKey) {
-    return res.status(400).json({ 
-      error: 'API Key missing. Please provide a key in the settings panel or configure a server-side GEMINI_API_KEY env variable.' 
-    });
+    let errorMsg = 'Gemini API Key missing. Please provide a Gemini key in the settings panel or configure a server-side GEMINI_API_KEY env variable.';
+    if (isOpenAI) {
+      errorMsg = 'OpenAI API Key missing. Please provide an OpenAI key in the settings panel or configure an OPENAI_API_KEY env variable.';
+    } else if (isGrok) {
+      errorMsg = 'Grok API Key missing. Please provide a Grok key in the settings panel or configure a GROK_API_KEY env variable.';
+    }
+    return res.status(400).json({ error: errorMsg });
   }
 
-  const model = modelName || 'gemini-2.5-flash';
+  const model = modelName || (isGrok ? 'grok-2' : isOpenAI ? 'gpt-4o-mini' : 'gemini-2.5-flash');
 
   const prompt = `
 Generate a highly detailed, professional document about "${topic}".
 The document must have exactly ${pageCount} pages.
 You must return a JSON object with a single key "pages" containing an array of exactly ${pageCount} page objects.
+Add related images and visualizations (flowcharts/charts) on pages where it enhances the explanation.
 Each page object corresponds to a single page in the final document, in chronological order:
 
 1. Page 1: Cover/Title page (type: "cover"). Fields:
@@ -61,7 +79,7 @@ Each page object corresponds to a single page in the final document, in chronolo
    - "chapterIndex": The chapter number integer
    - "pageIndex": The page number within this chapter integer
    - "paragraphs": An array of 2-3 extremely long, detailed, and highly accurate paragraphs discussing specific dimensions of the topic on this page.
-   Additionally, mix visual element configurations across these chapter pages (e.g., have some pages with lists, some with tables, some with charts):
+   Additionally, mix visual element configurations across these chapter pages (e.g., have some pages with lists, some with tables, some with charts, and some with related explanatory photos):
    - Page A can have: "hasCallout": true, "calloutText": "A strategic quote about ${topic}."
    - Page B can have: "hasList": true, "listItems": ["Detailed guideline 1", "Detailed guideline 2", "Detailed guideline 3", "Detailed guideline 4"]
    - Page C can have: "hasTable": true, "tableRows": [
@@ -69,7 +87,8 @@ Each page object corresponds to a single page in the final document, in chronolo
         {"metric": "Operational Cost", "baseline": "Initial overhead calculations", "target": "Optimized performance"},
         {"metric": "Compliance Rate", "baseline": "Current local regulations", "target": "100% audit alignment"}
      ]
-   - Page D can have: "hasChart": true, "chartType": "line-chart" (or "bar-chart" or "flow-chart")
+   - Page D can have: "hasChart": true, "chartType": "line-chart" (or "bar-chart", "flow-chart", "donut-chart")
+   - Page E can have: "hasPhoto": true, "photoQuery": "descriptive search terms (e.g. 'cybersecurity server room' or 'finance presentation board') to fetch a relevant stock photo", "photoCaption": "A detailed, professional caption describing the illustration context"
 
 5. Page ${pageCount - 1}: Summary & Strategic Conclusion (type: "conclusion"). Fields:
    - "title": "Summary & Strategic Conclusion"
@@ -83,36 +102,79 @@ Ensure the text generated is highly realistic, detailed, accurate, and completel
 `;
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: prompt
-          }]
-        }],
-        generationConfig: {
-          responseMimeType: "application/json"
-        }
-      })
-    });
+    let cleanText = '';
 
-    if (!response.ok) {
-      const errText = await response.text();
-      return res.status(response.status).json({ 
-        error: `Gemini API returned an error: ${response.statusText}`, 
-        details: errText 
+    if (isOpenAI || isGrok) {
+      const url = isGrok ? 'https://api.x.ai/v1/chat/completions' : 'https://api.openai.com/v1/chat/completions';
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          response_format: { type: "json_object" }
+        })
       });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        const errLog = `[${new Date().toISOString()}] ERROR: ${isGrok ? 'Grok' : 'OpenAI'} API returned ${response.status} ${response.statusText}. Details: ${errText}\n`;
+        try {
+          import('fs').then(fs => fs.appendFileSync('server.log', errLog));
+        } catch (e) { }
+        console.error(errLog.trim());
+        return res.status(response.status).json({
+          error: `${isGrok ? 'Grok' : 'OpenAI'} API returned an error: ${response.statusText}`,
+          details: errText
+        });
+      }
+
+      const result = await response.json();
+      cleanText = result.choices[0].message.content;
+    } else {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
+          }],
+          generationConfig: {
+            responseMimeType: "application/json"
+          }
+        })
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        const errLog = `[${new Date().toISOString()}] ERROR: Gemini API returned ${response.status} ${response.statusText}. Details: ${errText}\n`;
+        try {
+          import('fs').then(fs => fs.appendFileSync('server.log', errLog));
+        } catch (e) { }
+        console.error(errLog.trim());
+        return res.status(response.status).json({
+          error: `Gemini API returned an error: ${response.statusText}`,
+          details: errText
+        });
+      }
+
+      const result = await response.json();
+      cleanText = result.candidates[0].content.parts[0].text;
     }
 
-    const result = await response.json();
-    const responseText = result.candidates[0].content.parts[0].text;
-
-    let cleanText = responseText;
     if (cleanText.includes('```json')) {
       cleanText = cleanText.split('```json')[1].split('```')[0];
     } else if (cleanText.includes('```')) {
@@ -123,16 +185,16 @@ Ensure the text generated is highly realistic, detailed, accurate, and completel
     const parsedData = JSON.parse(cleanText);
 
     if (!parsedData.pages || !Array.isArray(parsedData.pages)) {
-      throw new Error('Invalid JSON format structure from Gemini API');
+      throw new Error(`Invalid JSON format structure from ${isOpenAI ? 'OpenAI' : 'Gemini'} API`);
     }
 
     res.json({ pages: parsedData.pages });
 
   } catch (err) {
-    console.error('Server error calling Gemini:', err);
-    res.status(500).json({ 
-      error: 'Failed to generate document content using Gemini AI.', 
-      details: err.message 
+    console.error(`Server error calling ${isOpenAI ? 'OpenAI' : 'Gemini'}:`, err);
+    res.status(500).json({
+      error: `Failed to generate document content using ${isOpenAI ? 'OpenAI' : 'Gemini'} AI.`,
+      details: err.message
     });
   }
 });
